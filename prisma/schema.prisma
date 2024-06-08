@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String           @id @unique
+  email            String           @unique
+  password         String
+  variables        Json
+  contactVariables Json
+  savedContacts    Int              @default(0)
+  connections      Connection[]
+  programmedItems  ProgramedItems[]
+  sessions         Session[]
+}
+
+model Connection {
+  id            String         @id @unique @default(cuid())
+  user_id       String
+  email         String
+  type          ConnectionType
+  access_token  String
+  refresh_token String
+  user          User           @relation(fields: [user_id], references: [id])
+}
+
+model ProgramedItems {
+  id          String         @id @unique @default(cuid())
+  user_id     String
+  files       Json
+  sendDate    DateTime?
+  to          String?
+  from        String?
+  status      Status
+  programType ProgrammedType
+  name        String?
+  order       Int
+  repeat      Repeat?
+  user        User           @relation(fields: [user_id], references: [id])
+}
+
+model Session {
+  id        String   @id @unique @default(cuid())
+  user_id   String
+  createdAt DateTime @default(now())
+  token     String
+  user      User     @relation(fields: [user_id], references: [id])
+}
+
+enum ProgrammedType {
+  MESSAGE
+  STATUS
+  FUNNEL
+}
+
+enum Status {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ConnectionType {
+  GOOGLE
+}
+
+enum Repeat {
+  NOREPEAT
+  EVERYHOUR
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  EVERYMINUTE
+}

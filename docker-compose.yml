@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./dock/app.dockerfile
+    ports:
+      - '5000:5000'
+    env_file:
+      - .env.prod
+    restart: always
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=elpepe
+      - POSTGRES_DB=mydb
+      - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/etivi
+  
+  redis: 
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+volumes:
+  db:
+    driver: local
+  redis:
